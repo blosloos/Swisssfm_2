@@ -64,7 +64,7 @@ run_daily_load <- function( # one function run per compound
 				if(STP_treatment_steps[i, "Erhoehte_Denitrifikation"] == "Ja") compound_elimination_STP$Erhoehte_Denitrifikation else{
 					compound_elimination_STP[ # Denitrifikation should only be available if there is a prior Nitrifikation, too - not further checked
 						"Denitrifikation"
-					][STP_treatment_steps[i, "Denitrifikation"] == "Ja"],
+					][STP_treatment_steps[i, "Denitrifikation"] == "Ja"]
 				},
 				
 				compound_elimination_STP[ 
