@@ -62,14 +62,11 @@ run_daily_load <- function( # one function run per compound
 				if(STP_treatment_steps[i, "Nitrifikation"] == "Ja") compound_elimination_STP$Nitrifikation else compound_elimination_STP$CSB_Abbau,
 								
 				if(STP_treatment_steps[i, "Erhoehte_Denitrifikation"] == "Ja") compound_elimination_STP$Erhoehte_Denitrifikation else{
-					compound_elimination_STP[ # Denitrifikation should only be available if there is a prior Nitrifikation, too - not further checked
-						"Denitrifikation"
-					][STP_treatment_steps[i, "Denitrifikation"] == "Ja"]
+					# Denitrifikation should only be available if there is a prior Nitrifikation, too - not further checked
+					if(STP_treatment_steps[i, "Denitrifikation"] == "Ja") compound_elimination_STP$Denitrifikation
 				},
 				
-				compound_elimination_STP[ 
-					"P_Elimination"
-				][STP_treatment_steps[i, "P_Elimination"] == "Ja"],				
+				if(STP_treatment_steps[i, "P_Elimination"] == "Ja") compound_elimination_STP$P_Elimination,		
 				
 				if(!is.na(STP_treatment_steps[i, "Typ_MV-Behandlung"])){
 					compound_elimination_STP[
