@@ -134,6 +134,16 @@ wrap_vsa <- function(
 		}
 		
 		# get & clean treatment steps
+		
+		miss_col <- which(!(c("Nitrifikation", "Denitrifikation", "Erhoehte Denitrifikation", "P_Elimination", "Typ_MV-Behandlung", "Inbetriebnahme") %in% names(STP_table)))
+		if(length(miss_col)){
+			stop(
+				paste0("Column(s) withe name ", 
+					paste(c("Nitrifikation", "Denitrifikation", "Erhoehte Denitrifikation", "P_Elimination", "Typ_MV-Behandlung", "Inbetriebnahme"))[miss_col], 
+					" missing in STP_table")
+			)
+		}
+		
 		STP_treatment_steps <- STP_table[, c("Nitrifikation", "Denitrifikation", "Erhoehte Denitrifikation", "P_Elimination", "Typ_MV-Behandlung", "Inbetriebnahme"), drop = FALSE]
 		STP_treatment_steps[is.na(STP_treatment_steps[, "Nitrifikation"]), "Nitrifikation"] <- "Nein"	
 		STP_treatment_steps[is.na(STP_treatment_steps[, "Denitrifikation"]), "Denitrifikation"] <- "Nein"
