@@ -207,11 +207,15 @@ wrap_vsa <- function(
 	for(n in 1:nrow(compound_elimination_STP)){
 			
 		###########################################
+		# get inputs per loop
 		# all required columns available?
+		
+		use_columns_local_discharge_loop <- use_columns_local_discharge[n]
+		
 		cols_required <- c(
 			"ARA_Nr", "ARANEXTNR", "angeschlossene_Einwohner_Abgabeliste2021", 
 			"Nitrifikation", "Denitrifikation", "Erhoehte_Denitrifikation", "P_Elimination", "Typ_MV-Behandlung", "Inbetriebnahme",
-			"ARA_Nr_Ziel_Umleitung", use_columns_local_discharge[n], "See_Elimination_min", "See_Elimination_max"
+			"ARA_Nr_Ziel_Umleitung", use_columns_local_discharge_loop, "See_Elimination_min", "See_Elimination_max"
 		)
 		if(any(is.na(match(cols_required, names(STP_table))))){
 			these_missing <- paste(cols_required[is.na(match(cols_required, names(STP_table)))], collapse = ",")
@@ -219,11 +223,8 @@ wrap_vsa <- function(
 		}
 		
 		STP_local_discharge_river_loop <- as.numeric(STP_table[, use_columns_local_discharge_loop])
-		#STP_local_discharge_river_loop[STP_local_discharge_river_loop < 0 | is.na(STP_local_discharge_river_loop)] <- 
-		#	mean(STP_local_discharge_river_loop[STP_local_discharge_river_loop > 0 & !is.na(STP_local_discharge_river_loop)])
-	
-		###########################################
-		# get inputs per loop
+
+
 		compound_load_gramm_per_capita_and_day_loop <- compound_load_gramm_per_capita_and_day[n]
 		
 		if(with_lake_elimination){		
@@ -231,7 +232,6 @@ wrap_vsa <- function(
 			if(n == 2) lake_eliminination_rates_loop <- as.numeric(STP_table$See_Elimination_max)
 		}else lake_eliminination_rates_loop <- rep(0, nrow(STP_table))
 		
-		use_columns_local_discharge_loop <- use_columns_local_discharge[n]
 		compound_elimination_STP_loop <- compound_elimination_STP[n,, drop = FALSE]
 	
 		if(add_absolute_load) absolute_loads_loop <- STP_table$Absolute_Fracht_add else absolute_loads_loop <- rep(0, nrow(STP_table))	
