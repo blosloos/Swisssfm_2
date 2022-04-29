@@ -580,14 +580,11 @@ if(FALSE){ # <- remove this check
 		result_table[2, 19] <- "Elimination Seen aktiv?"
 		result_table[3, 19] <- paste(with_lake_elimination, collapse = ", ")	
 		
-		result_table[2, 20] <- "Eliminationsraten See"
-		result_table[3, 20] <- paste(lake_eliminination_rates, collapse = ", ")			
+		result_table[2, 20] <- "use_columns_local_discharge"		
+		result_table[3, 20] <- paste(use_columns_local_discharge, collapse = ", ")	
 		
-		result_table[2, 21] <- "use_columns_local_discharge"		
-		result_table[3, 21] <- paste(use_columns_local_discharge, collapse = ", ")	
-		
-		result_table[2, 22] <- "use_columns_local_discharge_for_fractions"		
-		result_table[3, 22] <- paste(use_columns_local_discharge_for_fractions, collapse = ", ")			
+		result_table[2, 21] <- "use_columns_local_discharge_for_fractions"		
+		result_table[3, 21] <- paste(use_columns_local_discharge_for_fractions, collapse = ", ")			
 		
 
 		if(write_csv){
