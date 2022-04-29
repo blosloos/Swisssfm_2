@@ -9,7 +9,7 @@ run_daily_load <- function( # one function run per compound
 
 	inhabitants_total = 8417700,
 	hospital_beds_total = FALSE,					# Set to FALSE to ignore
-	STP_id, 
+	STP_id,
 	STP_treatment_steps,
 	STP_fraction_hospital= FALSE,
 	STP_amount_inhabitants,	
@@ -21,9 +21,13 @@ run_daily_load <- function( # one function run per compound
 	compound_excreted = 1,							# fraction excreted and discharged, set to 1 to ignore
 	
 	with_lake_elimination = FALSE,
-	lake_eliminination_rate = 0.25,
+	lake_eliminination_rates,
 	
-	topo_matrix
+	add_absolute_load = FALSE,
+	absolute_loads = FALSE,
+	
+	topo_matrix,
+	ARANEXTNR
 	
 ){
 
@@ -48,6 +52,8 @@ run_daily_load <- function( # one function run per compound
 	if(!is.numeric(compound_load_total) & !is.numeric(compound_load_gramm_per_capita_and_day)) stop("Problem in run_daily_load: either compound_load_total or compound_load_gramm_per_capita_and_day must be defined.")
 	topo_matrix[topo_matrix != 0] <- 1 	# in case topo_matrix contains STP id
 
+	if(!all(ARANEXTNR[!is.na(ARANEXTNR)] %in% STP_id)) stop("Invalid ARANEXTNR entries detected.")
+
 	###############################################
 	if(!is.numeric(compound_load_gramm_per_capita_and_day)) compound_load_gramm_per_capita_and_day <- compound_load_total * (1 - STP_fraction_hospital) * 1000 / inhabitants_total / 365 		# [kg/a] -> [g/d]
 	if(!is.numeric(compound_load_per_hospital_bed_and_day)) compound_load_per_hospital_bed_and_day <- compound_load_total * (STP_fraction_hospital) * 1000 / hospital_beds_total / 365 			# [kg/a] -> [g/d]
@@ -56,6 +62,8 @@ run_daily_load <- function( # one function run per compound
 	
 		compound_elimination_STP_calc <- rep(0, nrow(STP_treatment_steps))
 		for(i in 1:nrow(STP_treatment_steps)){
+		
+			# STP, See <- all STP_treatment_steps set to "Nein"
 		
 			compound_elimination_STP_calc[i] <- prod(1 - c(				
 				
@@ -85,66 +93,68 @@ run_daily_load <- function( # one function run per compound
 	load_local_g_d <- STP_amount_inhabitants * compound_load_gramm_per_capita_and_day * compound_excreted * compound_elimination_STP_calc
 	load_local_g_d <- load_local_g_d + STP_amount_hospital_beds * compound_load_per_hospital_bed_and_day * compound_excreted * compound_elimination_STP_calc
 	
+	load_local_g_d[is.na(load_local_g_d)] <- 0 # for lakes
+	
+	if(add_absolute_load){
+		absolute_loads[is.na(absolute_loads)] <- 0
+		load_local_g_d <- load_local_g_d + absolute_loads
+	}
+	
 	if(!with_lake_elimination){
 	
+		if(any(colnames(topo_matrix) != rownames(topo_matrix))) stop("topo_matrix must be symmetric")
 		load_cumulated_g_d <- apply(topo_matrix, MARGIN = 2, function(x, y){sum(x * y)}, y = load_local_g_d) # MARGIN = 2 -> iterates over columns
 	
 	}else{
 	
-		if(lake_eliminination_rate < 0 | lake_eliminination_rate > 1) stop("lake_eliminination_rate must be within [0, 1]")
+		lake_eliminination_rates[is.na(as.numeric(lake_eliminination_rates))] <- 0
+		if(any(lake_eliminination_rates < 0) | any(lake_eliminination_rates > 1)) stop("lake_eliminination_rate must be within [0, 1]")
 	
-		load_cumulated_g_d <- rep(NA, ncol(topo_matrix))
-		ARA_Nr_nach_See <- c(664301, 296400, 645700, 102400, 94400, 59300, 26101, 160200, 73300, 110400, 420800, 140100, 19301)
-		
-		except_ARA <- vector("list", 3) # Spezialfälle gemäss Kommentar in Seen.xlsx	
-		names(except_ARA) <- c(102400, 26101, 12101)
-		except_ARA[[1]] <- c(100900, 106603, 100100, 100402, 100401, 109800)
-		except_ARA[[2]] <- c(26102, 130101, 130103, 137000, 170500)		
-		except_ARA[[3]] <- c(11701)		
-		
-		if(any(colnames(topo_matrix) != rownames(topo_matrix))) stop("topo_matrix must be symmetric")
-		
-		for(n in 1:ncol(topo_matrix)){
 	
-			has_ARA_nach_See <- rownames(topo_matrix)[topo_matrix[, n] != 0][rownames(topo_matrix)[topo_matrix[, n] != 0] %in% ARA_Nr_nach_See]		
-			those <- which(rownames(topo_matrix) %in% has_ARA_nach_See)
+		# init cumulative loads with local loads
+		load_cumulated_g_d <- load_local_g_d
+	
+		not_loop_endless <- 0 # just to be save
+		
+		ARANEXTNR_iter <- ARANEXTNR
+		do_calc_node <- rep(TRUE, length(STP_id))
+		while(
+			any(do_calc_node) &
+			not_loop_endless < 1E5
+		){		
+		
+			for(k in 1:length(STP_id)){ # check through STPs / lakes
+		
+				# (1) still required to be calculated?
+				if(!do_calc_node[k]) next
+				
+				# (2) still awaiting load input?
+				if(STP_id[k] %in% ARANEXTNR_iter) next		
+		
+				# (3) for lakes: reduce load before adding on
+				load_cumulated_g_d[k] <- load_cumulated_g_d[k] * (1 - lake_eliminination_rates[k])		
 
-			if(length(those)){
-
-				those <- c(those, n) 	# -> INDEX in matrix
-				those <- those[order(colSums(topo_matrix[, those, drop = FALSE] != 0), decreasing = FALSE)] # if(length(those) > 1)
-				if(those[length(those)] != n) stop("THIS SHOULD NOT HAPPEN") # current STP should be last one when sorted by increasing count of upstream STPs
-				
-				done_STPs <- c()		# -> INDEX in matrix
-				load_cumulated_g_d_loop <- c()
-				
-				for(m in 1:length(those)){
-				
-					# Which are the non-nested STPs for this STP?
-					has_upstream_STPs <- which(topo_matrix[, those[m]] != 0)
-					has_upstream_STPs <- has_upstream_STPs[has_upstream_STPs != those[m]] # STP after lake excluded, and also last STP
-					if(rownames(topo_matrix)[those[m]] %in% names(except_ARA)){
-							
-						this <- which(names(except_ARA) == rownames(topo_matrix)[those[m]])
-						these_ARAs_to_exclude <- match(except_ARA[[this]], rownames(topo_matrix))
-						has_upstream_STPs <- has_upstream_STPs[!(has_upstream_STPs %in% these_ARAs_to_exclude)]
-					
-					}
- 					has_upstream_STPs <- has_upstream_STPs[!(has_upstream_STPs %in% done_STPs)]
-					done_STPs <- unique(c(done_STPs, which(topo_matrix[, those[m]] != 0)) )
-					done_STPs <- done_STPs[done_STPs != those[m]] # except has_ARA_nach_See itself
-					
-					if(length(has_upstream_STPs)) load_cumulated_g_d_loop <- c(load_cumulated_g_d_loop,
-						sum(load_local_g_d[has_upstream_STPs]) * ((1 - lake_eliminination_rate) ^ (length(those) - m)) # last section of STPs, after last lake -> lake_eliminination_rate^0 = 1
-					)
-										
+				# (4) adding on load to next STP or lake
+				if(!is.na(ARANEXTNR_iter[k])){
+					load_cumulated_g_d[STP_id == ARANEXTNR_iter[k]] <- load_cumulated_g_d[STP_id == ARANEXTNR_iter[k]] + load_cumulated_g_d[k]
+					ARANEXTNR_iter[k] <- NA
 				}
-				# add load of last STP 
-				load_cumulated_g_d_loop <- c(load_cumulated_g_d_loop, load_local_g_d[those[m]])
-				load_cumulated_g_d[n] <- sum(load_cumulated_g_d_loop)
-			
-			}else load_cumulated_g_d[n] <- sum(topo_matrix[, n] * load_local_g_d)
 
+				# (5) mark that node has been done
+				do_calc_node[k] <- FALSE
+		
+			}
+			
+			not_loop_endless <- not_loop_endless + 1
+			
+		}
+		if(not_loop_endless >= 1E5) stop("Load routing through ARA and lake network did not finish within expected number of iterations. Debug input data; any circularities?") 
+	
+		if(FALSE){ # some test -> outcomment above step (3) -> results as derived from topo_matrix sum should be the same
+			load_cumulated_g_d_check <- rep(NA, length(load_local_g_d)) 
+			for(n in 1:ncol(topo_matrix)) load_cumulated_g_d_check[n] <- sum(topo_matrix[, n] * load_local_g_d)
+			identical(round(load_cumulated_g_d_check, digits = 3), round(load_cumulated_g_d, digits = 3))		
+			cbind(load_cumulated_g_d_check, load_cumulated_g_d)[load_cumulated_g_d_check != load_cumulated_g_d,]
 		}
 	
 	}
@@ -153,7 +163,7 @@ run_daily_load <- function( # one function run per compound
 	STP_count_cumulated <- apply(topo_matrix, MARGIN = 2, function(x){ sum(x) - 1 })
 	###############################################
 	result <- data.frame(
-		as.numeric(STP_id), 
+		STP_id, 
 		as.numeric(load_local_g_d), 
 		as.numeric(load_cumulated_g_d), 
 		as.numeric(inhabitants_cumulated), 

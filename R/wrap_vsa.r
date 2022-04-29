@@ -56,10 +56,10 @@ wrap_vsa <- function(
 	compound_excreted = 1,						# fraction excreted and discharged, set to 1 to ignore
 	
 	with_lake_elimination = FALSE,
-	lake_eliminination_rates = 0.25,
+	add_absolute_load = FALSE,
 	
-	use_columns_local_discharge = ("Q347_L_s_kleinster"),
-	use_columns_local_discharge_for_fractions = ("Q347_L_s_kleinster"), 
+	use_columns_local_discharge = "Q347_L_s_kleinster",
+	use_columns_local_discharge_for_fractions = "Q347_L_s_kleinster", 
 	add_columns_from_STP_table = c("ARANEXTNR", "LageX", "LageY"),
 	path_out = FALSE,							# if FALSE, return data.frame
 	overwrite = TRUE,
@@ -73,15 +73,13 @@ wrap_vsa <- function(
 	# and if smaller/larger values are set correctly
 	if(!identical(
 		length(compound_load_gramm_per_capita_and_day),
-		length(lake_eliminination_rates),
 		length(use_columns_local_discharge),
 		nrow(compound_elimination_STP)
-	)) stop("compound_load_gramm_per_capita_and_day, lake_eliminination_rates, use_columns_local_discharge and the number of rows in compound_elimination_STP must be of equal length")	
-	if(!(length(compound_load_gramm_per_capita_and_day) %in% c(1, 2))) stop("compound_load_gramm_per_capita_and_day, lake_eliminination_rates, use_columns_local_discharge and the number of rows in compound_elimination_STP must have either one or two entries")
+	)) stop("compound_load_gramm_per_capita_and_day, use_columns_local_discharge and the number of rows in compound_elimination_STP must be of equal length")	
+	if(!(length(compound_load_gramm_per_capita_and_day) %in% c(1, 2))) stop("compound_load_gramm_per_capita_and_day, use_columns_local_discharge and the number of rows in compound_elimination_STP must have either one or two entries")
 	if(length(compound_load_gramm_per_capita_and_day) == 2){
 		if(compound_load_gramm_per_capita_and_day[1] < compound_load_gramm_per_capita_and_day[2]) stop("compound_load_gramm_per_capita_and_day set incorrectly for range calculation")
 		if(any(compound_elimination_STP[1, ] > compound_elimination_STP[2, ])) stop("compound_elimination_STP set incorrectly for range calculation")
-		if(with_lake_elimination) if(lake_eliminination_rates[1] > lake_eliminination_rates[2]) stop("lake_eliminination_rates set incorrectly for range calculation")
 		if(any(STP_table[, use_columns_local_discharge[1]] > STP_table[, use_columns_local_discharge[2]], na.rm = TRUE)) stop("use_columns_local_discharge set incorrectly for range calculation")	
 	}
 	###############################################
@@ -125,13 +123,11 @@ wrap_vsa <- function(
 		# STP_local_discharge_river <- as.numeric(STP_table[, use_columns_local_discharge_loop]) # -> inside and after loop below
 		STP_amount_people_local <- STP_table$angeschlossene_Einwohner_Abgabeliste2021
 		
-		# check: Umleitung affects any ARA_Nr_nach_See?
 		if(with_lake_elimination){
-			ARA_Nr_nach_See <- c(664301, 296400, 645700, 102400, 94400, 59300, 26101, 160200, 73300, 110400, 420800, 140100, 19301)
-#			Umleitung <- STP_table[, "Typ_MV-Behandlung"] == "Umleitung"
-#			Umleitung[is.na(Umleitung)] <- "FALSE" 
-#			if(any(ARA_Nr_nach_See %in% STP_table$ARA_Nr[as.logical(Umleitung)])) stop("ARA_Nr_nach_See affected by Umleitung - this must not be the case for.")
+			if(!("See_Elimination_min" %in% names(STP_table))) stop("Column See_Elimination_min missing in STP_table")
+			if(!("See_Elimination_max" %in% names(STP_table))) stop("Column See_Elimination_max missing in STP_table")			
 		}
+		if(add_absolute_load) if(!("Absolute_Fracht_add" %in% names(STP_table))) stop("Column Absolute_Fracht_add missing in STP_table")
 		
 		# get & clean treatment steps
 		
@@ -209,20 +205,13 @@ wrap_vsa <- function(
 	
 	store_results <- vector("list", nrow(compound_elimination_STP))
 	for(n in 1:nrow(compound_elimination_STP)){
-	
-		###########################################
-		# get inputs per loop
-		compound_load_gramm_per_capita_and_day_loop <- compound_load_gramm_per_capita_and_day[n]
-		lake_eliminination_rates_loop <- lake_eliminination_rates[n]
-		use_columns_local_discharge_loop <- use_columns_local_discharge[n]
-		compound_elimination_STP_loop <- compound_elimination_STP[n,, drop = FALSE]
-	
+			
 		###########################################
 		# all required columns available?
 		cols_required <- c(
 			"ARA_Nr", "ARANEXTNR", "angeschlossene_Einwohner_Abgabeliste2021", 
 			"Nitrifikation", "Denitrifikation", "Erhoehte_Denitrifikation", "P_Elimination", "Typ_MV-Behandlung", "Inbetriebnahme",
-			"ARA_Nr_Ziel_Umleitung", use_columns_local_discharge_loop
+			"ARA_Nr_Ziel_Umleitung", use_columns_local_discharge[n], "See_Elimination_min", "See_Elimination_max"
 		)
 		if(any(is.na(match(cols_required, names(STP_table))))){
 			these_missing <- paste(cols_required[is.na(match(cols_required, names(STP_table)))], collapse = ",")
@@ -232,6 +221,21 @@ wrap_vsa <- function(
 		STP_local_discharge_river_loop <- as.numeric(STP_table[, use_columns_local_discharge_loop])
 		#STP_local_discharge_river_loop[STP_local_discharge_river_loop < 0 | is.na(STP_local_discharge_river_loop)] <- 
 		#	mean(STP_local_discharge_river_loop[STP_local_discharge_river_loop > 0 & !is.na(STP_local_discharge_river_loop)])
+	
+		###########################################
+		# get inputs per loop
+		compound_load_gramm_per_capita_and_day_loop <- compound_load_gramm_per_capita_and_day[n]
+		
+		if(with_lake_elimination){		
+			if(n == 1) lake_eliminination_rates_loop <- as.numeric(STP_table$See_Elimination_min)
+			if(n == 2) lake_eliminination_rates_loop <- as.numeric(STP_table$See_Elimination_max)
+		}else lake_eliminination_rates_loop <- rep(0, nrow(STP_table))
+		
+		use_columns_local_discharge_loop <- use_columns_local_discharge[n]
+		compound_elimination_STP_loop <- compound_elimination_STP[n,, drop = FALSE]
+	
+		if(add_absolute_load) absolute_loads_loop <- STP_table$Absolute_Fracht_add else absolute_loads_loop <- rep(0, nrow(STP_table))	
+		
 		
 		
 		###########################################
@@ -250,7 +254,10 @@ wrap_vsa <- function(
 			compound_load_per_hospital_bed_and_day = compound_load_per_hospital_bed_and_day
 			compound_elimination_STP = compound_elimination_STP_loop
 			compound_excreted = 1
-			lake_eliminination_rate = lake_eliminination_rates_loop
+			lake_eliminination_rates = lake_eliminination_rates_loop
+			absolute_loads = absolute_loads_loop
+			ARANEXTNR = STP_table$ARANEXTNR
+	
 			
 		}
 		
@@ -270,9 +277,13 @@ wrap_vsa <- function(
 			compound_excreted = 1,										# fraction excreted and discharged, set to 1 to ignore
 			
 			with_lake_elimination = with_lake_elimination,
-			lake_eliminination_rate = lake_eliminination_rates_loop,		
+			lake_eliminination_rates = lake_eliminination_rates_loop,	
+
+			add_absolute_load = add_absolute_load,
+			absolute_loads = absolute_loads_loop,
 			
-			topo_matrix
+			topo_matrix,
+			ARANEXTNR = STP_table$ARANEXTNR
 			
 		) # [g / d]
 		###########################################
