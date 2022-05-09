@@ -301,12 +301,12 @@ wrap_vsa <- function(
 
 	if(nrow(compound_elimination_STP) == 2){
 	
-		names(store_results[[1]]) <- c("STP_ID", "load_local_g_d_max", "load_cumulated_g_d_max", "inhabitants_cumulated", "STP_count_cumulated", "conc_local_ug_L_max", "conc_cumulated_ug_L_max")
-		names(store_results[[2]]) <- c("STP_ID", "load_local_g_d_min", "load_cumulated_g_d_min", "inhabitants_cumulated", "STP_count_cumulated", "conc_local_ug_L_min", "conc_cumulated_ug_L_min")
+		names(store_results[[1]]) <- c("STP_ID", "input_load_local_g_d_max", "load_local_g_d_max", "load_cumulated_g_d_max", "inhabitants_cumulated", "STP_count_cumulated", "conc_local_ug_L_max", "conc_cumulated_ug_L_max")
+		names(store_results[[2]]) <- c("STP_ID", "input_load_local_g_d_min", "load_local_g_d_min", "load_cumulated_g_d_min", "inhabitants_cumulated", "STP_count_cumulated", "conc_local_ug_L_min", "conc_cumulated_ug_L_min")
 	
 		result_table <- cbind(
-			store_results[[1]][, c("STP_ID", "load_local_g_d_max", "load_cumulated_g_d_max", "inhabitants_cumulated", "STP_count_cumulated", "conc_local_ug_L_max", "conc_cumulated_ug_L_max")],
-			store_results[[2]][, c("load_local_g_d_min", "load_cumulated_g_d_min", "conc_local_ug_L_min", "conc_cumulated_ug_L_min")]	
+			store_results[[1]][, c("STP_ID", "input_load_local_g_d_max", "load_local_g_d_max", "load_cumulated_g_d_max", "inhabitants_cumulated", "STP_count_cumulated", "conc_local_ug_L_max", "conc_cumulated_ug_L_max")],
+			store_results[[2]][, c("input_load_local_g_d_min", "load_local_g_d_min", "load_cumulated_g_d_min", "conc_local_ug_L_min", "conc_cumulated_ug_L_min")]	
 		)
 	
 	}else result_table <- store_results[[1]]
@@ -458,6 +458,8 @@ wrap_vsa <- function(
 			"Fraction_of_wastewater_nitrification",
 			"Fraction_of_wastewater_denitrification",
 			"Fraction_of_wastewater_advanced_treatment",
+			"input_load_local_g_d_max", 
+			"input_load_local_g_d_min",
 			"load_local_g_d_max",
 			"load_local_g_d_min",
 			"load_cumulated_g_d_max",
@@ -490,6 +492,7 @@ wrap_vsa <- function(
 			"Fraction_of_wastewater_nitrification",
 			"Fraction_of_wastewater_denitrification",
 			"Fraction_of_wastewater_advanced_treatment",
+			"input_load_local_g_d",
 			"load_local_g_d",
 			"load_cumulated_g_d",
 			"conc_local_ug_L",

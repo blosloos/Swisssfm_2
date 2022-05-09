@@ -113,6 +113,7 @@ run_daily_load <- function( # one function run per compound
 	}
 	if(!(length(compound_elimination_STP_calc) %in% c(1, length(STP_id)))) stop("Problem in run_daily_load: invalid length for compound_elimination_STP_calc.")
 	
+	input_load_local_g_d <- STP_amount_inhabitants * compound_load_gramm_per_capita_and_day 
 	load_local_g_d <- STP_amount_inhabitants * compound_load_gramm_per_capita_and_day * compound_excreted * compound_elimination_STP_calc
 	load_local_g_d <- load_local_g_d + STP_amount_hospital_beds * compound_load_per_hospital_bed_and_day * compound_excreted * compound_elimination_STP_calc
 	
@@ -187,12 +188,13 @@ run_daily_load <- function( # one function run per compound
 	###############################################
 	result <- data.frame(
 		STP_id, 
+		as.numeric(input_load_local_g_d),
 		as.numeric(load_local_g_d), 
 		as.numeric(load_cumulated_g_d), 
 		as.numeric(inhabitants_cumulated), 
 		as.numeric(STP_count_cumulated), 
 		row.names = NULL)
-	names(result) <- c("STP_ID", "load_local_g_d", "load_cumulated_g_d", "inhabitants_cumulated", "STP_count_cumulated")
+	names(result) <- c("STP_ID", "input_load_local_g_d", "load_local_g_d", "load_cumulated_g_d", "inhabitants_cumulated", "STP_count_cumulated")
 	return(result)
 	
 }
