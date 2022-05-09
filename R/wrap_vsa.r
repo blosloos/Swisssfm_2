@@ -34,26 +34,27 @@ if(FALSE){
 
 wrap_vsa <- function(
 
-	STP_table = NULL,							# Must be a data.frame if provided, overwrites all of the below STP_ arguments
+	STP_table = NULL,									# Must be a data.frame if provided, overwrites all of the below STP_ arguments
 	
 	STP_scenario_year = 2021,
-	STP_reroute = TRUE,							# Reroute STPs until a given STP_scenario_year
-	STP_filter_steps = TRUE,					# Filter STP treatment steps until a given STP_scenario_year
+	STP_reroute = TRUE,									# Reroute STPs until a given STP_scenario_year
+	STP_filter_steps = TRUE,							# Filter STP treatment steps until a given STP_scenario_year
 	
 	STP_id = NULL,
 	STP_id_next = NULL,
 	STP_amount_inhabitants = NULL,
-	STP_local_discharge_river = NULL,			# discharge in river at STP
+	STP_local_discharge_river = NULL,					# discharge in river at STP
 	STP_treatment_steps = NULL,
-	STP_discharge_per_capita = 400,				# [l / E d]
-	STP_amount_people_local = NULL,				# amount of people at STP
+	STP_discharge_per_capita = 400,						# [l / E d]
+	STP_amount_people_local = NULL,						# amount of people at STP
 	
 	compound_name,
-	compound_load_total = FALSE, 				# [kg / a]
-	compound_load_gramm_per_capita_and_day,		# [g / E d], set to FALSE to ignore
-	compound_load_per_hospital_bed_and_day = 0,	# [g / E d], set to FALSE to ignore
-	compound_elimination_STP = NULL,			# named dataframe or vector with elimination fractions over treatment steps (not percentage values); set to 0 to skip a step 
-	compound_excreted = 1,						# fraction excreted and discharged, set to 1 to ignore
+	compound_load_total = FALSE, 						# [kg / a]
+	compound_load_gramm_per_capita_and_day,				# [g / E d], set to FALSE to ignore
+	compound_load_per_hospital_bed_and_day = 0,			# [g / E d], set to FALSE to ignore
+	compound_elimination_STP = NULL,					# named dataframe or vector with elimination fractions over treatment steps (not percentage values); set to 0 to skip a step 
+	compound_elimination_method = "micropollutants",	# "micropollutants" or "nutrients"
+	compound_excreted = 1,								# fraction excreted and discharged, set to 1 to ignore
 	
 	with_lake_elimination = FALSE,
 	add_absolute_load = FALSE,
@@ -61,9 +62,9 @@ wrap_vsa <- function(
 	use_columns_local_discharge = "Q347_L_s_kleinster",
 	use_columns_local_discharge_for_fractions = "Q347_L_s_kleinster", 
 	add_columns_from_STP_table = c("ARANEXTNR", "LageX", "LageY"),
-	path_out = FALSE,							# if FALSE, return data.frame
+	path_out = FALSE,									# if FALSE, return data.frame
 	overwrite = TRUE,
-	write_csv = TRUE,							# else, exports an excel file
+	write_csv = TRUE,									# else, exports an excel file
 	use_sep_csv = " "
 	
 ){
@@ -274,6 +275,7 @@ wrap_vsa <- function(
 			compound_load_gramm_per_capita_and_day = compound_load_gramm_per_capita_and_day_loop,		# [g / E d], set to FALSE to ignore
 			compound_load_per_hospital_bed_and_day = compound_load_per_hospital_bed_and_day,
 			compound_elimination_STP = compound_elimination_STP_loop,	# vector or STP-specific matrix with elimination fractions over treatment steps (not percentage values); set to 0 to skip a step 
+			compound_elimination_method = compound_elimination_method,
 			compound_excreted = 1,										# fraction excreted and discharged, set to 1 to ignore
 			
 			with_lake_elimination = with_lake_elimination,
