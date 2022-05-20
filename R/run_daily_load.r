@@ -43,7 +43,7 @@ run_daily_load <- function( # one function run per compound
 	if(any(not_found)) stop("Problem in wrap_vsa, argument compound_elimination_STP: entry ", compound_elimination_STP[not_found], " is missing.")
 	if(any((compound_elimination_STP < 0) & (compound_elimination_STP > 1))) stop("Problem in run_daily_load: compound_elimination_STP not within [0,1]")
 	if(!(compound_elimination_method %in% c("micropollutants", "nutrients", "WWTP individual"))) stop("Problem in run_daily_load: invalid compound_elimination_method, must be either micropollutants, nutrients or WWTP individual.")
-	if((compound_elimination_method == "WWTP individual") & (STP_elimination_rate == FALSE)) stop("Problem in run_daily_load: compound_elimination_method set to WWTP individual, but no STP_elimination_rate provided. Please revise.")
+	if((compound_elimination_method == "WWTP individual") & (STP_elimination_rate[1] == FALSE)) stop("Problem in run_daily_load: compound_elimination_method set to WWTP individual, but no STP_elimination_rate provided. Please revise.")
 	
 	if(!all(STP_id %in% colnames(topo_matrix))) stop("Problem in run_daily_load: not all STP_id present in topo_matrix")
 	if(!all(colnames(topo_matrix) %in% STP_id)) stop("Problem in run_daily_load: not all topo_matrix entries present in STP_id")
