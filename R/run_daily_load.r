@@ -14,6 +14,7 @@ run_daily_load <- function( # one function run per compound
 	STP_fraction_hospital= FALSE,
 	STP_amount_inhabitants,	
 	STP_amount_hospital_beds = FALSE,					# Set to FALSE to ignore
+	STP_elimination_rate = FALSE,
 	compound_load_total, 								# [kg / a], set to FALSE to ignore and then use compound_load_gramm_per_capita_and_day
 	compound_load_gramm_per_capita_and_day = FALSE,		# [g / E d], set to FALSE to ignore and then use compound_load_total
 	compound_load_per_hospital_bed_and_day = FALSE, 	# [g / E d], set to FALSE to ignore and then use compound_load_total
@@ -41,7 +42,8 @@ run_daily_load <- function( # one function run per compound
 	not_found <- !(STP_steps %in% names(compound_elimination_STP))
 	if(any(not_found)) stop("Problem in wrap_vsa, argument compound_elimination_STP: entry ", compound_elimination_STP[not_found], " is missing.")
 	if(any((compound_elimination_STP < 0) & (compound_elimination_STP > 1))) stop("Problem in run_daily_load: compound_elimination_STP not within [0,1]")
-	if(!(compound_elimination_method %in% c("micropollutants", "nutrients"))) stop("Problem in run_daily_load: invalid compound_elimination_method, must be either micropollutants or nutrients.")
+	if(!(compound_elimination_method %in% c("micropollutants", "nutrients", "WWTP individual"))) stop("Problem in run_daily_load: invalid compound_elimination_method, must be either micropollutants, nutrients or WWTP individual.")
+	if((compound_elimination_method == "WWTP individual") & (STP_elimination_rate == FALSE)) stop("Problem in run_daily_load: compound_elimination_method set to WWTP individual, but no STP_elimination_rate provided. Please revise.")
 	
 	if(!all(STP_id %in% colnames(topo_matrix))) stop("Problem in run_daily_load: not all STP_id present in topo_matrix")
 	if(!all(colnames(topo_matrix) %in% STP_id)) stop("Problem in run_daily_load: not all topo_matrix entries present in STP_id")
@@ -104,6 +106,14 @@ run_daily_load <- function( # one function run per compound
 					}
 			
 				))
+			
+			}
+			#######################################
+			if(compound_elimination_method == "WWTP individual"){ 
+				
+				if(!length(STP_elimination_rate[i])) next
+				if(is.na(STP_elimination_rate[i])) next
+				compound_elimination_STP_calc[i] <- STP_elimination_rate[i]
 			
 			}
 			#######################################

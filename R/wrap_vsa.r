@@ -61,6 +61,7 @@ wrap_vsa <- function(
 	
 	use_columns_local_discharge = "Q347_L_s_kleinster",
 	use_columns_local_discharge_for_fractions = "Q347_L_s_kleinster", 
+	use_STP_elimination_rate = FALSE,
 	add_columns_from_STP_table = c("ARANEXTNR", "LageX", "LageY"),
 	path_out = FALSE,									# if FALSE, return data.frame
 	overwrite = TRUE,
@@ -83,6 +84,7 @@ wrap_vsa <- function(
 		if(any(compound_elimination_STP[1, ] > compound_elimination_STP[2, ])) stop("compound_elimination_STP set incorrectly for range calculation")
 		if(any(STP_table[, use_columns_local_discharge[1]] > STP_table[, use_columns_local_discharge[2]], na.rm = TRUE)) stop("use_columns_local_discharge set incorrectly for range calculation")	
 	}
+	if((compound_elimination_method == "WWTP individual") & (use_STP_elimination_rate[1] = FALSE)) stop("compound_elimination_method set to WWTP individual, but no STP columns for use_STP_elimination_rate defined. Please revise.")
 	###############################################
 	# -> if available, get all inputs from STP_table
 	if(!is.numeric(STP_scenario_year)) stop("STP_scenario_year must be numeric")
@@ -218,13 +220,23 @@ wrap_vsa <- function(
 			"Nitrifikation", "Denitrifikation", "Erhoehte_Denitrifikation", "P_Elimination", "Typ_MV-Behandlung", "Inbetriebnahme",
 			"ARA_Nr_Ziel_Umleitung", use_columns_local_discharge_loop, "See_Elimination_min", "See_Elimination_max"
 		)
+		
+		if(compound_elimination_method == "WWTP individual"){
+			cols_required <- c(cols_required, use_STP_elimination_rate[n])
+			use_columns_STP_elimination_rate_loop <- use_STP_elimination_rate[n]	
+		}
+		
 		if(any(is.na(match(cols_required, names(STP_table))))){
 			these_missing <- paste(cols_required[is.na(match(cols_required, names(STP_table)))], collapse = ",")
 			stop(paste0("STP_table is missing these columns: ", these_missing))
 		}
 		
 		STP_local_discharge_river_loop <- as.numeric(STP_table[, use_columns_local_discharge_loop])
-
+		
+		if(compound_elimination_method == "WWTP individual"){
+			use_STP_elimination_rate_loop <- as.numeric(STP_table[, use_columns_STP_elimination_rate_loop])
+		}else use_STP_elimination_rate_loop <- FALSE
+		
 
 		compound_load_gramm_per_capita_and_day_loop <- compound_load_gramm_per_capita_and_day[n]
 		
@@ -271,6 +283,7 @@ wrap_vsa <- function(
 			STP_fraction_hospital = FALSE,
 			STP_amount_inhabitants = STP_amount_inhabitants,	
 			STP_amount_hospital_beds = FALSE,							# Set to FALSE to ignore
+			STP_elimination_rate = use_STP_elimination_rate_loop,
 			compound_load_total = FALSE, 								# [kg / a]
 			compound_load_gramm_per_capita_and_day = compound_load_gramm_per_capita_and_day_loop,		# [g / E d], set to FALSE to ignore
 			compound_load_per_hospital_bed_and_day = compound_load_per_hospital_bed_and_day,
