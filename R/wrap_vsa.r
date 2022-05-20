@@ -18,6 +18,8 @@ if(FALSE){
 
 	compound_excreted = 1
 	
+	use_STP_elimination_rate = use_columns_STP_elimination_rate
+	
 	add_columns_from_STP_table = c("ARANEXTNR", "LageX", "LageY")
 
 	overwrite = TRUE	
@@ -84,7 +86,7 @@ wrap_vsa <- function(
 		if(any(compound_elimination_STP[1, ] > compound_elimination_STP[2, ])) stop("compound_elimination_STP set incorrectly for range calculation")
 		if(any(STP_table[, use_columns_local_discharge[1]] > STP_table[, use_columns_local_discharge[2]], na.rm = TRUE)) stop("use_columns_local_discharge set incorrectly for range calculation")	
 	}
-	if((compound_elimination_method == "WWTP individual") & (use_STP_elimination_rate[1] = FALSE)) stop("compound_elimination_method set to WWTP individual, but no STP columns for use_STP_elimination_rate defined. Please revise.")
+	if((compound_elimination_method == "WWTP individual") & (use_STP_elimination_rate[1] == FALSE)) stop("compound_elimination_method set to WWTP individual, but no STP columns for use_STP_elimination_rate defined. Please revise.")
 	###############################################
 	# -> if available, get all inputs from STP_table
 	if(!is.numeric(STP_scenario_year)) stop("STP_scenario_year must be numeric")
