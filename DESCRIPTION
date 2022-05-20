@@ -1,8 +1,8 @@
 Package: Swisssfm
 Type: Package
 Title: Catchment-based micropollutant routing for swiss sewage treatment plants 
-Version: 2.1
-Date: 2022-05-09
+Version: 2.2
+Date: 2022-05-25
 Author: Martin Loos, Rebekka Gulde
 Maintainer: Martin Loos <mloos@envibee.ch>
 Description: Catchment-based micropollutant routing for swiss sewage treatment plants, based on and extending the publication of Ort et al. (ES&T, 2009, 43, pp. 3214-3220)
