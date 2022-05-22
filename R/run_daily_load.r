@@ -113,7 +113,8 @@ run_daily_load <- function( # one function run per compound
 				
 				if(!length(STP_elimination_rate[i])) next
 				if(is.na(STP_elimination_rate[i])) next
-				compound_elimination_STP_calc[i] <- STP_elimination_rate[i]
+				if(is.na(as.numeric(STP_elimination_rate[i]))) next
+				compound_elimination_STP_calc[i] <- (1 - as.numeric(STP_elimination_rate[i]))
 			
 			}
 			#######################################
