@@ -116,6 +116,18 @@ wrap_vsa <- function(
 				
 				STP_table_rerouted <- STP_table[those,, drop = FALSE]
 				STP_table <- STP_table[-those,, drop = FALSE]
+
+
+
+				
+	#that_not <- which(!(ARANEXTNR[!is.na(ARANEXTNR)] %in% STP_id))
+	#if(length(that_not)) stop(paste0("Invalid ARANEXTNR entry detected: ", ARANEXTNR[!is.na(ARANEXTNR)][that_not], paste(collapse = ", ")))
+
+
+	#STP_id[!is.na(ARANEXTNR)][that_not]
+
+				
+				
 			
 			}else STP_table_rerouted <- NULL
 		
