@@ -185,6 +185,7 @@ wrap_vsa <- function(
 	###########################################
 	# check inputs & defaults #################
 	if(!is.numeric(STP_amount_inhabitants)) stop("Problem in wrap_vsa: STP_amount_inhabitants must be numeric.")
+	STP_amount_inhabitants[is.na(STP_amount_inhabitants)] <- 0	# e.g. for lakes
 	if(!identical(length(STP_id), length(STP_id_next), length(STP_amount_inhabitants))) stop("Problem in wrap_vsa: STP_id, STP_id_next and STP_amount_inhabitants must be of equal length.")
 	if(!overwrite & !is.logical(path_out)) if(file.exists(path_out)) stop("Problem in wrap_vsa: file at path_out already exists; remove it or use overwrite = TRUE.")
 	if(!file.exists(path_out)) dir.create(path = path_out)	
@@ -281,6 +282,7 @@ wrap_vsa <- function(
 			STP_fraction_hospital = FALSE
 			STP_amount_inhabitants = STP_amount_inhabitants	
 			STP_amount_hospital_beds = FALSE
+			STP_elimination_rate = use_STP_elimination_rate_loop
 			compound_load_total = FALSE
 			compound_load_gramm_per_capita_and_day = compound_load_gramm_per_capita_and_day_loop
 			compound_load_per_hospital_bed_and_day = compound_load_per_hospital_bed_and_day
