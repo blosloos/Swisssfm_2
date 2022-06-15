@@ -28,7 +28,8 @@ if(FALSE){
 	
 	use_sep_csv = ","
 	write_csv = TRUE
-		
+	
+	
 }
 
 
@@ -103,7 +104,7 @@ wrap_vsa <- function(
 				(as.numeric(STP_table[, "Inbetriebnahme"]) <= STP_scenario_year)
 			)
 			if(length(those)){
-				for(i in those){ # rewrite angeschlossene_Einwohner_Abgabeliste2021
+				for(i in those){	# rewrite angeschlossene_Einwohner_Abgabeliste2021, adapt ARANEXT
 				
 					to_STP <- STP_table[i, "ARA_Nr_Ziel_Umleitung"] 	# per ID
 					if(!(to_STP %in% STP_table$ARA_Nr)) stop(paste0("Invalid ARA_Nr_Ziel_Umleitung for STP ", STP_table[i, "ARA_Nr"]))
@@ -111,6 +112,23 @@ wrap_vsa <- function(
 					if(!is.na(STP_table[to_STP, "ARA_Nr_Ziel_Umleitung"])) stop(paste0("Invalid ARA_Nr_Ziel_Umleitung for STP ", STP_table[i, "ARA_Nr"], ": rerouted STP is rerouted itself."))
 					has_STP_amount_people_local <- STP_table[i, "angeschlossene_Einwohner_Abgabeliste2021"]
 					STP_table[to_STP, "angeschlossene_Einwohner_Abgabeliste2021"] <- STP_table[to_STP, "angeschlossene_Einwohner_Abgabeliste2021"] + has_STP_amount_people_local
+					
+					# if rerouted ARA is an ARANEXT to another ARA -> adapt these to its ARANEXT, if necessary looped in case the latter is rerouted as well
+					if(STP_table$ARA_Nr[i] %in% STP_table$ARANEXTNR){
+					
+						for_this_ARA <- which(STP_table$ARANEXTNR == STP_table$ARA_Nr[i])
+						to_ARANEXTNR <- STP_table$ARANEXTNR[i]
+						at_ARANEXTNR <- which(STP_table$ARA_Nr == to_ARANEXTNR)
+						repeat( # if necessary looped in case the latter is rerouted as well
+							if(at_ARANEXTNR %in% those){
+								to_ARANEXTNR <- STP_table$ARANEXTNR[at_ARANEXTNR]
+								if(is.na(to_ARANEXTNR)) break
+								at_ARANEXTNR <- which(STP_table$ARA_Nr == to_ARANEXTNR)							
+							}else break
+						)
+						STP_table$ARANEXTNR[for_this_ARA] <- to_ARANEXTNR
+					
+					}
 				
 				}
 				
