@@ -57,7 +57,7 @@ run_daily_load <- function( # one function run per compound
 	topo_matrix[topo_matrix != 0] <- 1 	# in case topo_matrix contains STP id
 
 	that_not <- which(!(ARANEXTNR[!is.na(ARANEXTNR)] %in% STP_id))
-	if(length(that_not)) stop(paste0("Invalid ARANEXTNR entry detected: ", ARANEXTNR[!is.na(ARANEXTNR)][that_not], paste(collapse = ", ")))
+	if(length(that_not)) stop(paste0("Invalid ARANEXTNR entry detected: ", paste(ARANEXTNR[!is.na(ARANEXTNR)][that_not], collapse = ", ")))
 
 	###############################################
 	if(!is.numeric(compound_load_gramm_per_capita_and_day)) compound_load_gramm_per_capita_and_day <- compound_load_total * (1 - STP_fraction_hospital) * 1000 / inhabitants_total / 365 		# [kg/a] -> [g/d]

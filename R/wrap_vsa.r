@@ -112,7 +112,6 @@ wrap_vsa <- function(
 					if(!is.na(STP_table[to_STP, "ARA_Nr_Ziel_Umleitung"])) stop(paste0("Invalid ARA_Nr_Ziel_Umleitung for STP ", STP_table[i, "ARA_Nr"], ": rerouted STP is rerouted itself."))
 					has_STP_amount_people_local <- STP_table[i, "angeschlossene_Einwohner_Abgabeliste2021"]
 					STP_table[to_STP, "angeschlossene_Einwohner_Abgabeliste2021"] <- STP_table[to_STP, "angeschlossene_Einwohner_Abgabeliste2021"] + has_STP_amount_people_local
-					
 					# if rerouted ARA is an ARANEXT to another ARA -> adapt these to its ARANEXT, if necessary looped in case the latter is rerouted as well
 					if(STP_table$ARA_Nr[i] %in% STP_table$ARANEXTNR){
 					
@@ -129,23 +128,11 @@ wrap_vsa <- function(
 						STP_table$ARANEXTNR[for_this_ARA] <- to_ARANEXTNR
 					
 					}
-				
+					
 				}
 				
 				STP_table_rerouted <- STP_table[those,, drop = FALSE]
 				STP_table <- STP_table[-those,, drop = FALSE]
-
-
-
-				
-	#that_not <- which(!(ARANEXTNR[!is.na(ARANEXTNR)] %in% STP_id))
-	#if(length(that_not)) stop(paste0("Invalid ARANEXTNR entry detected: ", ARANEXTNR[!is.na(ARANEXTNR)][that_not], paste(collapse = ", ")))
-
-
-	#STP_id[!is.na(ARANEXTNR)][that_not]
-
-				
-				
 			
 			}else STP_table_rerouted <- NULL
 		
