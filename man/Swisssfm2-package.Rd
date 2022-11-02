@@ -1,24 +1,24 @@
-\name{Swisssfm-package}
-\alias{Swisssfm-package}
-\alias{Swisssfm}
+\name{Swisssfm2-package}
+\alias{Swisssfm2-package}
+\alias{Swisssfm2}
 \docType{package}
 \title{
-\packageTitle{Swisssfm}
+\packageTitle{Swisssfm2}
 }
 \description{
-\packageDescription{Swisssfm}
+\packageDescription{Swisssfm2}
 }
 \details{
 
 The DESCRIPTION file:
-\packageDESCRIPTION{Swisssfm}
-\packageIndices{Swisssfm}
+\packageDESCRIPTION{Swisssfm2}
+\packageIndices{Swisssfm2}
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-\packageAuthor{Swisssfm}
+\packageAuthor{Swisssfm2}
 
-Maintainer: \packageMaintainer{Swisssfm}
+Maintainer: \packageMaintainer{Swisssfm2}
 }
 \references{
 ~~ Literature or other references for background information ~~

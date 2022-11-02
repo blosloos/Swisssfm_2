@@ -12,7 +12,7 @@ sfmplot <- function(){
 				##########################################################################
 				fluidRow(
 					column(2, 
-						HTML('<br><h3>Swisssfm STP map</h3>')
+						HTML('<br><h3>Swisssfm2 STP map</h3>')
 					),
 					column(4, 
 						HTML('<br>'),
