@@ -193,7 +193,7 @@ wrap_vsa <- function(
 	
 	###########################################
 	# calculate topology matrix ###############
-	topo_matrix <- make_topology(
+	topo_matrix <- Swisssfm2:::make_topology(
 	
 		STP_id_next = STP_id_next, 					# NA if none available
 		STP_id = STP_id,					
@@ -295,7 +295,7 @@ wrap_vsa <- function(
 			
 		}
 		
-		result_table <- run_daily_load(
+		result_table <- Swisssfm2:::run_daily_load(
 
 			inhabitants_total = sum(STP_amount_inhabitants),
 			hospital_beds_total = FALSE,								# Set to FALSE to ignore
