@@ -32,6 +32,8 @@ library(devtools)
 
 install_github("blosloos/Swisssfm/Swisssfm/")
 
+install_github("blosloos/Swisssfm_2")
+
 
 
 library(devtools)
