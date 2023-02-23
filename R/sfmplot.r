@@ -1,4 +1,4 @@
-
+Depends: shiny, shinyBS, shinyalert, DT
 
 
 sfmplot <- function(){
